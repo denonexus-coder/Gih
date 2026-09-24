@@ -14,10 +14,14 @@ jobs:
       - name: Copiar libs
         run: |
           NDK="$ANDROID_HOME/ndk/27.3.13750724"
-          L="$NDK/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android"
           mkdir -p out
-          cp "$L/libc++_static.a" "$L/libc++abi.a" "$L/libunwind.a" out/
+          for f in libc++_static.a libc++abi.a libunwind.a; do
+            P=$(find "$NDK" -name "$f" -path '*aarch64*' | head -1)
+            echo "$f -> ${P:-NAO ENCONTRADO}"
+            [ -n "$P" ] && cp "$P" out/
+          done
           ls -lh out
+          test -f out/libc++_static.a
       - uses: actions/upload-artifact@v4
         with:
           name: libcxx-arm64
